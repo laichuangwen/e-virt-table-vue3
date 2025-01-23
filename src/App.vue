@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { faker } from "@faker-js/faker";
 import dayjs from "dayjs";
-import EVirtTable, { Column, ConfigType } from "e-virt-table";
+import type { Column, ConfigType } from "e-virt-table";
+import EVirtTable from "e-virt-table";
 import EVirtTableVue from "./components/EVirtTableVue.vue";
 import { ref } from "vue";
 const editorTypes = ["text", "select", "date"];

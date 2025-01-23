@@ -1,4 +1,8 @@
 <script lang="ts" setup>
+import type Cell from "e-virt-table/dist/lib/Cell";
+import type { Column, ConfigType, OverlayerContainer } from "e-virt-table";
+import type { EventCallback } from "e-virt-table/dist/lib/EventBus";
+import EVirtTable from "e-virt-table";
 import {
   ElDatePicker,
   ElInputNumber,
@@ -6,14 +10,7 @@ import {
   ElCascader,
   ElTimePicker,
 } from "element-plus";
-import Cell from "e-virt-table/dist/lib/Cell";
-import EVirtTable, {
-  Column,
-  ConfigType,
-  OverlayerContainer,
-} from "e-virt-table";
-import { ref, onMounted, h, nextTick, computed, useAttrs, watch } from "vue";
-import { EventCallback } from "e-virt-table/dist/lib/EventBus";
+import { ref, onMounted, nextTick, computed, useAttrs, watch } from "vue";
 type EDITOR_TYPE = "text" | "select" | "date" | "number" | "time" | "cascader";
 const emit = defineEmits<{
   (e: "change", value: any[]): void; // 需要默认实现change，不能动态绑定
