@@ -95,6 +95,25 @@ let columns = ref<Column[]>([
     rules: [{ required: false, type: "number", message: "Please input" }],
   },
   {
+    title: "amount",
+    key: "amount",
+    editorType: "number",
+    formatter: ({ row }) => {
+      const formatter = new Intl.NumberFormat("zh-CN", {
+        style: "currency",
+        currency: "CNY",
+        minimumFractionDigits: 2, // 保留两位小数
+      });
+      return row.amount ? formatter.format(row.amount) : "";
+    },
+    editorProps: {
+      precision: 2,
+      min: 0,
+      max: 100000,
+    },
+    align: "right",
+  },
+  {
     title: "years",
     key: "years",
     editorType: "date",
@@ -147,6 +166,7 @@ const users = faker.helpers.multiple(
         editorTypes[faker.number.int({ min: 0, max: editorTypes.length - 1 })],
       select: faker.person.sex(),
       number: faker.number.int({ min: 24, max: 66 }),
+      amount: faker.number.int({ min: 0, max: 10000 }),
       date: dayjs(faker.date.recent()).format("YYYY-MM-DD"),
       years: dayjs(faker.date.anytime()).format("YYYY"),
       month: dayjs(faker.date.anytime()).format("YYYY-MM"),
