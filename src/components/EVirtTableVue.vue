@@ -131,47 +131,39 @@ onMounted(() => {
   eVirtTable.on("startEdit", (cell) => {
     editorCell.value = cell;
     editorType.value = cell.editorType;
-    // 内部已经处理了文本类型的编辑
-    if (editorType.value === "text") {
-      return;
-    }
-    if (editorType.value === "select") {
-      nextTick(() => {
+    nextTick(() => {
+      // 内部已经处理了文本类型的编辑
+      if (editorType.value === "text") {
+        return;
+      }
+      if (editorType.value === "select") {
         selectValue.value = cell.value;
         eVirtTableEditorSelectRef.value?.focus();
-      });
-      return;
-    }
-    if (editorType.value === "cascader") {
-      nextTick(() => {
+        return;
+      }
+      if (editorType.value === "cascader") {
         cascaderValue.value = cell.value;
         eVirtTableEditorCascaderRef.value?.togglePopperVisible(true);
-      });
-      return;
-    }
-    if (editorType.value === "date") {
-      nextTick(() => {
+        return;
+      }
+      if (editorType.value === "date") {
         dateValue.value = cell.value;
         const dateRef = eVirtTableEditorDateRef.value as any;
         dateRef?.focus();
-      });
-      return;
-    }
-    if (editorType.value === "time") {
-      nextTick(() => {
+        return;
+      }
+      if (editorType.value === "time") {
         timeValue.value = cell.value;
         const timeRef = eVirtTableEditorTimeRef.value as any;
         timeRef?.focus();
-      });
-      return;
-    }
-    if (editorType.value === "number") {
-      nextTick(() => {
+        return;
+      }
+      if (editorType.value === "number") {
         numberValue.value = cell.value;
         eVirtTableEditorNumberRef.value?.focus();
-      });
-      return;
-    }
+        return;
+      }
+    });
   });
   eVirtTable.on("doneEdit", () => {
     editorType.value = "text";
