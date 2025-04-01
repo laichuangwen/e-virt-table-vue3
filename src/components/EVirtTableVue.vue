@@ -49,7 +49,7 @@ const props = defineProps({
 // );
 watch(
   () => props.columns,
-  (newValue) => {
+  (newValue: any) => {
     eVirtTable?.loadColumns(newValue);
   },
   { deep: true }
@@ -168,6 +168,16 @@ onMounted(() => {
   eVirtTable.on("doneEdit", () => {
     editorType.value = "text";
   });
+  eVirtTable.on("outsideMousedown", (e) => {
+    const ancestor =
+      e.target instanceof Node &&
+      e.target.closest(".d-evirt-table-editor-popper");
+    if (ancestor) {
+      return;
+    }
+    // 说明点到容器外部了
+    eVirtTable?.clearEditor();
+  });
   emit("ready", eVirtTable);
 });
 function saveCellValue(value: any) {
@@ -185,6 +195,7 @@ function saveCellValue(value: any) {
       <el-select-v2
         ref="eVirtTableEditorSelectRef"
         class="e-virt-table-editor-select"
+        popper-class="d-evirt-table-editor-popper"
         v-if="editorType === 'select'"
         v-model="selectValue"
         :automatic-dropdown="true"
@@ -196,6 +207,7 @@ function saveCellValue(value: any) {
       <el-cascader
         ref="eVirtTableEditorCascaderRef"
         class="e-virt-table-editor-cascader"
+        popper-class="d-evirt-table-editor-popper"
         v-if="editorType === 'cascader'"
         v-model="cascaderValue"
         clearable
@@ -206,6 +218,7 @@ function saveCellValue(value: any) {
       <el-date-picker
         ref="eVirtTableEditorDateRef"
         class="e-virt-table-editor-date"
+        popper-class="d-evirt-table-editor-popper"
         v-if="editorType === 'date'"
         v-model="dateValue"
         value-format="YYYY-MM-DD"
@@ -217,6 +230,7 @@ function saveCellValue(value: any) {
       <el-time-picker
         ref="eVirtTableEditorTimeRef"
         class="e-virt-table-editor-time"
+        popper-class="d-evirt-table-editor-popper"
         v-if="editorType === 'time'"
         v-model="timeValue"
         :style="editorStyle"
