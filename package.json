@@ -11,7 +11,7 @@
   "dependencies": {
     "@faker-js/faker": "^9.4.0",
     "dayjs": "^1.11.13",
-    "e-virt-table": "^1.2.6",
+    "e-virt-table": "^1.2.8",
     "element-plus": "^2.9.3",
     "sass-embedded": "^1.83.4",
     "vue": "^3.5.13"
