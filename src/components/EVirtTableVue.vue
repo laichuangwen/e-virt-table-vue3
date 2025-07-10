@@ -11,10 +11,18 @@ import {
   ElTimePicker,
 } from "element-plus";
 import { ref, onMounted, nextTick, computed, useAttrs, watch } from "vue";
-type EDITOR_TYPE = "text" | "select" | "date" | "number" | "time" | "cascader";
+type EDITOR_TYPE =
+  | "text"
+  | "select"
+  | "date"
+  | "number"
+  | "time"
+  | "cascader"
+  | "loading";
 const emit = defineEmits<{
   (e: "change", value: any[]): void; // 需要默认实现change，不能动态绑定
   (e: "ready", value: EVirtTable): void;
+  (e: "selectChange", value: { cell: Cell; value: any; options: any[] }): void;
 }>();
 const props = defineProps({
   columns: {
@@ -126,11 +134,19 @@ onMounted(() => {
     emit("change", value);
   });
   eVirtTable.on("overlayerChange", (overlayer: OverlayerContainer) => {
+    // 销毁dom
+    overlayerView.value.views = [];
     overlayerView.value = overlayer;
   });
-  eVirtTable.on("startEdit", (cell) => {
-    editorCell.value = cell;
+  eVirtTable.on("startEdit", async (cell) => {
+    const { editorProps } = cell;
+    if (editorProps && typeof editorProps === "function") {
+      editorType.value = "loading";
+      editorCell.value = cell;
+      cell.editorProps = await editorProps(cell);
+    }
     editorType.value = cell.editorType;
+    editorCell.value = cell;
     nextTick(() => {
       // 内部已经处理了文本类型的编辑
       if (editorType.value === "text") {
@@ -166,6 +182,18 @@ onMounted(() => {
     });
   });
   eVirtTable.on("doneEdit", () => {
+    /// 多选时
+    if (
+      editorCell.value &&
+      editorType.value === "select" &&
+      editorCell.value.editorProps?.multiple
+    ) {
+      const { rowKey, key } = editorCell.value;
+      if (selectValue.value !== editorCell.value.getValue()) {
+        // 不用 eVirtTable?.setItemValueByEditor，内部有doneEdit会递归
+        eVirtTable?.ctx.setItemValueByEditor(rowKey, key, selectValue.value);
+      }
+    }
     editorType.value = "text";
   });
   eVirtTable.on("outsideMousedown", (e) => {
@@ -180,6 +208,21 @@ onMounted(() => {
   });
   emit("ready", eVirtTable);
 });
+function selectChange(value: any) {
+  if (!eVirtTable || !editorCell.value) {
+    return;
+  }
+  emit("selectChange", {
+    cell: editorCell.value,
+    options: editorCell.value.editorProps?.options || [],
+    value,
+  });
+  // 如果是多选的select编辑器，直接返回,点击外层时保存
+  if (editorType.value === "select" && editorCell.value.editorProps?.multiple) {
+    return;
+  }
+  saveCellValue(value);
+}
 function saveCellValue(value: any) {
   if (!eVirtTable || !editorCell.value) {
     return;
@@ -191,7 +234,11 @@ function saveCellValue(value: any) {
 <template>
   <div ref="eVirtTableRef" v-loading="loading">
     <div ref="eVirtTableEditorRef">
-      <!-- 自定义编辑器 -->
+      <div
+        v-if="editorType === 'loading'"
+        :style="editorStyle"
+        v-loading="true"
+      ></div>
       <el-select-v2
         ref="eVirtTableEditorSelectRef"
         class="e-virt-table-editor-select"
@@ -202,7 +249,7 @@ function saveCellValue(value: any) {
         clearable
         :style="editorStyle"
         v-bind="editorCell?.editorProps"
-        @change="saveCellValue"
+        @change="selectChange"
       />
       <el-cascader
         ref="eVirtTableEditorCascaderRef"
@@ -270,6 +317,7 @@ function saveCellValue(value: any) {
           >
             <component
               v-if="typeof cell.render === 'function'"
+              :key="`${cell.rowKey}_${cell.key}`"
               :is="cell.render(cell)"
             ></component>
             <template v-if="typeof cell.render === 'string'">

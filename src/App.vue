@@ -38,10 +38,7 @@ let columns = ref<Column[]>([
   {
     title: "email",
     key: "email",
-    rules: [
-      { required: true, message: "Please input" },
-      { type: "email", message: "Please input a valid email address" },
-    ],
+    rules: [{ required: true, message: "Please input" }],
   },
   {
     title: "customType",
@@ -59,6 +56,44 @@ let columns = ref<Column[]>([
     editorType: "select",
     editorProps: {
       filterable: true,
+      options: [
+        { label: "male", value: "male" },
+        { label: "female", value: "female" },
+      ],
+    },
+  },
+  {
+    title: "select-async",
+    key: "selectAsync",
+    editorType: "select",
+    width: 160,
+    editorProps: async () => {
+      const options = await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve([
+            { label: "male", value: "male" },
+            { label: "female", value: "female" },
+          ]);
+        }, 500);
+      });
+      return {
+        filterable: true,
+        multiple: true,
+        "collapse-tags": true,
+        options,
+      };
+    },
+  },
+  {
+    title: "select-multiple",
+    key: "selectMultiple",
+    editorType: "select",
+    width: 160,
+    editorProps: {
+      filterable: true,
+      multiple: true,
+      clearable: true,
+      "collapse-tags": true,
       options: [
         { label: "male", value: "male" },
         { label: "female", value: "female" },
@@ -92,7 +127,12 @@ let columns = ref<Column[]>([
     key: "number",
     editorType: "number",
     align: "right",
-    rules: [{ required: false, type: "number", message: "Please input" }],
+  },
+  {
+    title: "number-type",
+    key: "numberType",
+    type: "number",
+    align: "right",
   },
   {
     title: "amount",
@@ -165,7 +205,9 @@ const users = faker.helpers.multiple(
       customType:
         editorTypes[faker.number.int({ min: 0, max: editorTypes.length - 1 })],
       select: faker.person.sex(),
+      selectMultiple: [faker.person.sex()],
       number: faker.number.int({ min: 24, max: 66 }),
+      numberType: faker.number.int({ min: 24, max: 66 }),
       amount: faker.number.int({ min: 0, max: 10000 }),
       date: dayjs(faker.date.recent()).format("YYYY-MM-DD"),
       years: dayjs(faker.date.anytime()).format("YYYY"),
@@ -227,7 +269,7 @@ const config: ConfigType = {
   },
 };
 function change(data: any) {
-  console.log(data);
+  console.log("change", data);
 }
 let evirtTable: EVirtTable | null = null;
 function ready(grid: EVirtTable) {
@@ -239,6 +281,17 @@ function setDisabled(value: any) {
     ...config,
     DISABLED: !value,
   });
+}
+function selectChange({
+  cell,
+  value,
+  options,
+}: {
+  cell: any;
+  value: any;
+  options: any[];
+}) {
+  console.log("selectChange", value, options);
 }
 </script>
 <template>
@@ -258,8 +311,9 @@ function setDisabled(value: any) {
       :data="users"
       :config="config"
       @change="change"
+      @selectChange="selectChange"
     >
-      <template #avatar="{ row }">
+      <!-- <template #avatar="{ row }">
         <div
           style="
             width: 100%;
@@ -271,8 +325,8 @@ function setDisabled(value: any) {
         >
           <el-avatar :src="row.avatar" style="width: 20px; height: 20px" />
         </div>
-      </template>
-      <template #image="{ row }">
+      </template> -->
+      <template #image="{ row, cell }">
         <div
           style="
             width: 100%;
@@ -285,6 +339,7 @@ function setDisabled(value: any) {
           <el-image
             :src="row.image"
             preview-teleported
+            lazy
             :preview-src-list="[row.image]"
             style="width: 20px; height: 20px"
           />
