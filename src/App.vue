@@ -291,7 +291,7 @@ function selectChange({
   value: any;
   options: any[];
 }) {
-  console.log("selectChange", value, options);
+  console.log("selectChange", value, options, cell);
 }
 </script>
 <template>
@@ -326,7 +326,7 @@ function selectChange({
           <el-avatar :src="row.avatar" style="width: 20px; height: 20px" />
         </div>
       </template> -->
-      <template #image="{ row, cell }">
+      <template #image="{ row }">
         <div
           style="
             width: 100%;
