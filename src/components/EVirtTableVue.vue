@@ -49,12 +49,12 @@ const props = defineProps({
     default: false,
   },
 });
-// watch(
-//     props.data,
-//     (newValue) => {
-//         eVirtTable?.loadData(newValue);
-//     },
-// );
+watch(
+    () =>props.data,
+    (newValue: any) => {
+        eVirtTable?.loadData(newValue);
+    },
+);
 watch(
   () => props.columns,
   (newValue: any) => {
@@ -62,12 +62,12 @@ watch(
   },
   { deep: true }
 );
-// watch(
-//     props.footerData,
-//     (newValue) => {
-//         eVirtTable?.loadFooterData(newValue);
-//     },
-// );
+watch(
+    () => props.footerData,
+    (newValue: any) => {
+        eVirtTable?.loadFooterData(newValue);
+    },
+);
 let eVirtTable: EVirtTable | null = null;
 const attrs = useAttrs();
 const eVirtTableRef = ref(null);
